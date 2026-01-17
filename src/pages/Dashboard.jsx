@@ -1,89 +1,103 @@
+
 import React, { useState, useMemo, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
 import StatsCard from "../components/StatsCard";
 import GrievanceTable from "../components/GrievanceTable";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { FiInbox, FiClock, FiCheckCircle, FiUsers } from "react-icons/fi";
 import { useTableFilter } from "../hooks/useTableFilter";
-import { getDashboardStats } from "../api/userService";
-
-
+import { getDashboardStats, fetchGrievances } from "../api/userService";
 
 export default function Dashboard() {
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState("ALL");
-const [stats, setStats] = useState({
-  totalGrievances: 0,
-  pending: 0,
-  completed: 0,
-  activeAgents: 0,
-});
+  const [tab, setTab] = useState("RECENT");
+
+  const [stats, setStats] = useState({
+    totalGrievances: 0,
+    pending: 0,
+    completed: 0,
+    activeAgents: 0,
+  });
 
   const [grievances, setGrievances] = useState([]);
 
- useEffect(() => {
-  loadDashboard();
-}, []);
+  useEffect(() => {
+    if (tab === "RECENT") {
+      loadRecentGrievances();
+    } else if (tab === "ALL") {
+      loadAllGrievances();
+    }
+  }, [tab]);
 
-const loadDashboard = async () => {
-  try {
-    const data = await getDashboardStats();
+  const loadRecentGrievances = async () => {
+    try {
+      const data = await getDashboardStats();
 
-    setStats({
-      totalGrievances: data.totalGrievances,
-      pending: data.grievanceStatusCounts?.PENDING || 0,
-      completed: data.grievanceStatusCounts?.COMPLETED || 0,
-      activeAgents: data.totalUsers || 0,
-    });
+      setStats({
+        totalGrievances: data.totalGrievances,
+        pending: data.grievanceStatusCounts?.PENDING || 0,
+        completed: data.grievanceStatusCounts?.COMPLETED || 0,
+        activeAgents: data.totalUsers || 0,
+      });
 
-    // 👇 Map recentActivity to table structure
-   const grievanceList = (data.recentActivity || []).map((g) => ({
-     id: g.grievanceId,
-     name: g.name,
-     subName: g.contact,
-     location: g.address,
-     topic: g.topic, // ✅ fixed
-     block: g.block,
-     date: g.createdDate, // or g.date if exists
-     status: g.status,
-     agent: g.agentName || "Unassigned",
-   }));
+      const grievanceList = (data.recentActivity || []).map((g) => ({
+        id: g.grievanceId,
+        name: g.name,
+        subName: g.contact,
+        location: g.address,
+        topic: g.topic,
+        block: g.block,
+        date: g.createdDate,
+        status: g.status,
+        agent: g.agentName || "Unassigned",
+      }));
 
+      setGrievances(grievanceList);
+    } catch (error) {
+      console.error("Dashboard load error:", error);
+    }
+  };
 
-    setGrievances(grievanceList);
-  } catch (error) {
-    console.error("Dashboard load error:", error);
-  }
-};
+  const loadAllGrievances = async () => {
+    try {
+      const res = await fetchGrievances();
+      const list = res?.content || [];
 
+      const grievanceList = list.map((g) => ({
+        id: g.grievanceId,
+        name: g.name,
+        subName: g.contact,
+        location: g.address,
+        topic: g.topic1,
+        block: g.block,
+        date: g.createdAt,
+        status: g.status,
+        agent: g.agentName || "Unassigned",
+      }));
 
+      setGrievances(grievanceList);
+    } catch (error) {
+      console.error("All grievance load error:", error);
+    }
+  };
 
   const blocks = useMemo(() => {
-  if (!Array.isArray(grievances)) return [];
-  return [...new Set(grievances.map((g) => g.block).filter(Boolean))].sort();
-}, [grievances]);
+    if (!Array.isArray(grievances)) return [];
+    return [...new Set(grievances.map((g) => g.block).filter(Boolean))].sort();
+  }, [grievances]);
 
-const searchedData = Array.isArray(grievances)
-  ? grievances.filter((g) =>
-      (g.name + g.subName + g.topic + g.location)
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    )
-  : [];
+  const searchedData = Array.isArray(grievances)
+    ? grievances.filter((g) =>
+        (g.name + g.subName + g.topic + g.location)
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      )
+    : [];
 
-
-  const {
-    filters,
-    setFilters,
-    applyFilters,
-    resetFilters,
-    filteredData,
-  } = useTableFilter(searchedData);
+  const { filters, setFilters, applyFilters, resetFilters, filteredData } =
+    useTableFilter(searchedData);
 
   return (
     <div className="flex min-h-screen bg-gray-100 p-3 sm:p-4 md:p-6 lg:p-8">
-      {/* <Sidebar /> */}
-
       <main className="flex-1 p-8 bg-gray-100 min-h-screen">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -119,29 +133,16 @@ const searchedData = Array.isArray(grievances)
             value={stats.completed}
             icon={<FiCheckCircle className="text-green-600 text-2xl" />}
           />
-
           <StatsCard
             label="Active Agents"
             value={stats.activeAgents}
             icon={<FiUsers className="text-pink-500 text-2xl" />}
           />
         </div>
-        
-        {/* Tabs + Filter panel */}
+
+        {/* Tabs */}
         <div className="bg-white rounded-xl shadow p-4 mb-6">
           <div className="flex items-center gap-6 pb-4 mb-4">
-            <button
-              onClick={() => setTab("ALL")}
-              className="relative pb-2 text-sm font-medium text-gray-600"
-            >
-              All Grievances
-              <span
-                className={`absolute left-0 -bottom-1 h-[2px] w-full bg-blue-600 transition-all ${
-                  tab === "ALL" ? "scale-x-100" : "scale-x-0"
-                }`}
-              />
-            </button>
-
             <button
               onClick={() => setTab("RECENT")}
               className="relative pb-2 text-sm font-medium text-gray-600"
@@ -155,6 +156,18 @@ const searchedData = Array.isArray(grievances)
             </button>
 
             <button
+              onClick={() => setTab("ALL")}
+              className="relative pb-2 text-sm font-medium text-gray-600"
+            >
+              All Grievances
+              <span
+                className={`absolute left-0 -bottom-1 h-[2px] w-full bg-blue-600 transition-all ${
+                  tab === "ALL" ? "scale-x-100" : "scale-x-0"
+                }`}
+              />
+            </button>
+
+            {/* <button
               onClick={() => setTab("ASSIGNED")}
               className="relative pb-2 text-sm font-medium text-gray-600"
             >
@@ -164,13 +177,13 @@ const searchedData = Array.isArray(grievances)
                   tab === "ASSIGNED" ? "scale-x-100" : "scale-x-0"
                 }`}
               />
-            </button>
+            </button> */}
           </div>
 
           {/* Filters */}
           <div className="bg-white rounded-xl shadow-sm p-5">
             <div className="grid grid-cols-6 gap-6 items-end">
-              <div className="flex flex-col gap-1"> 
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-semibold text-gray-600">
                   Status
                 </label>
@@ -187,8 +200,8 @@ const searchedData = Array.isArray(grievances)
                 </select>
               </div>
 
-             <div className="flex flex-col gap-1"> 
-              <label className="text-xs font-semibold text-gray-600">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-600">
                   Block
                 </label>
                 <select
@@ -207,8 +220,8 @@ const searchedData = Array.isArray(grievances)
                 </select>
               </div>
 
-             <div className="flex flex-col gap-1"> 
-              <label className="text-xs font-semibold text-gray-600">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-600">
                   Ward No.
                 </label>
                 <input
@@ -221,8 +234,8 @@ const searchedData = Array.isArray(grievances)
                 />
               </div>
 
-             <div className="flex flex-col gap-1"> 
-              <label className="text-xs font-semibold text-gray-600">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-semibold text-gray-600">
                   Date
                 </label>
                 <input
@@ -253,7 +266,6 @@ const searchedData = Array.isArray(grievances)
           </div>
         </div>
 
-        {/* Table */}
         <GrievanceTable data={filteredData} />
       </main>
     </div>

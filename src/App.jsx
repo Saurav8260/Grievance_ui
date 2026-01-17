@@ -1,6 +1,5 @@
-import { BrowserRouter,Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-// import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AddAgent from "./pages/AddAgent";
 import UserList from "./pages/UserList";
@@ -8,16 +7,13 @@ import UserDetails from "./pages/UserDetails";
 import MainLayout from "./MainLayout";
 import GrievanceDetails from "./pages/GrievanceDetails";
 import EditGrievance from "./pages/EditGrievance";
-//  import PrivateRoute from "./components/PrivateRoute";
-
+import GrievanceList from "./pages/GrievanceList";
 
 // simple auth guard
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  console.log(token)
   return token ? children : <Navigate to="/login" />;
 };
-
 
 export default function App() {
   return (
@@ -27,8 +23,6 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/grievance/:id" element={<GrievanceDetails />} />
         <Route path="/grievance/edit/:id" element={<EditGrievance />} />
-
-        {/* <Route path="/signup" element={<Signup />} /> */}
 
         {/* Protected Layout */}
         <Route element={<MainLayout />}>
@@ -44,7 +38,7 @@ export default function App() {
           <Route
             path="/AddAgent"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute>
                 <AddAgent />
               </PrivateRoute>
             }
@@ -53,7 +47,7 @@ export default function App() {
           <Route
             path="/userdetails"
             element={
-              <PrivateRoute role="admin">
+              <PrivateRoute>
                 <UserList />
               </PrivateRoute>
             }
@@ -67,6 +61,7 @@ export default function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/grievances/:id"
             element={
@@ -77,18 +72,27 @@ export default function App() {
           />
 
           <Route
-            path="/grievances/:id"
+            path="/grievances/edit/:id"
             element={
               <PrivateRoute>
                 <EditGrievance />
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="/grievances"
+            element={
+              <PrivateRoute>
+                <GrievanceList />
+              </PrivateRoute>
+            }
+          />
         </Route>
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
 }
-

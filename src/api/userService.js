@@ -144,16 +144,31 @@ export const updateGrievance = async (id, payload) => {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      name: payload.name,
       block: payload.block,
-      grievanceDetails: payload.grievanceDetails,
-      status: payload.status,
-      assignedAgent: payload.assignedAgent,
+      gp: payload.gp,
+      villageSahi: payload.villageSahi,
+      address: payload.address,
+      wardNo: payload.wardNo,
+      name: payload.name,
+      fatherSpouseName: payload.fatherSpouseName,
       contact: payload.contact,
-      location: payload.location,
-      
+      topic1: payload.topic1,
+      topic2: payload.topic2,
+      topic3: payload.topic3,
+      topic4: payload.topic4,
+      topic5: payload.topic5,
+      grievanceDetails: payload.grievanceDetails,
+      agentRemarks: payload.agentRemarks,
+      agentName: payload.agentName,
+      workGivenTo: payload.workGivenTo,
+      status: payload.status,
+      adminDate: payload.adminDate,
+      adminRemarks: payload.adminRemarks,
+      attachments: payload.attachments 
+
     }),
   });
+  
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -185,3 +200,25 @@ export const patchUserStatus = async (userId, activate) => {
 
   return response.json();
 };
+
+// ================= GET ALL GRIEVANCES =================
+
+export const fetchGrievances = async () => {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${BASE_URL}/grievances/all`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("API Error:", response.status, text);
+    throw new Error("Failed to fetch grievances");
+  }
+
+  return response.json();
+};
+

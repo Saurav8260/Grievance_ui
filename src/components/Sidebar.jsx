@@ -5,7 +5,6 @@ import {
   FiFileText,
   FiUsers,
   FiSettings,
-  
   FiLogOut, 
   FiCheck,
   FiActivity,
@@ -18,7 +17,7 @@ import { FaHandshake } from "react-icons/fa";
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role"); // ✅ get role
+  // const role = localStorage.getItem("role"); // ✅ get role
   const userId = localStorage.getItem("userId"); // ✅ get userId
   
   return (
@@ -60,6 +59,7 @@ export default function Sidebar() {
 
           <button
             onClick={() => navigate(`/profile/${userId}`)}
+
             className="w-13 h-13 bg-white rounded-xl flex items-center justify-center
                        text-gray-400 hover:bg-gray-800 transition"
             title="profile"

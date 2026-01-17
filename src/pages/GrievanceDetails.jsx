@@ -200,11 +200,7 @@ export default function GrievanceDetails() {
           Last updated automatically from central grievance system
         </div>
 
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-3 text-right text-xs text-gray-500">
-          Last updated automatically from central grievance system
-        </div>
-
+        
       </div>
     </div>
   );
