@@ -4,22 +4,21 @@ import { loginUser } from "../api/userService";
 
 export default function Login() {
   const [form, setForm] = useState({
-    contact: "",
+    name: "",
     password: "",
     role: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!form.contact || !form.password) {
-      setError("Contact and password are required");
+    if (!form.name || !form.password) {
+      setError(" name and password are required");
       return;
     }
 
@@ -34,7 +33,18 @@ export default function Login() {
       localStorage.setItem("role", res.role);
       localStorage.setItem("userId", res.userId);
 
-      navigate("/profile");
+      // Force user to enter name before dashboard
+      const savedName = localStorage.getItem("dashboard_name");
+      if (!savedName) {
+        const name = prompt("Please enter your name to continue:");
+        if (!name || !name.trim()) {
+          setError("Name is required to enter dashboard");
+          setLoading(false);
+          return;
+        }
+        localStorage.setItem("dashboard_name", name);
+      }
+
       navigate("/dashboard");
     } catch (err) {
       setError(err.message || "Invalid credentials");
@@ -60,59 +70,21 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Role Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Login As
-            </label>
-            <div className="flex justify-between bg-gray-50 p-3 rounded-xl">
-              <label className="flex items-center gap-2 cursor-pointer text-gray-700">
-                <input
-                  type="radio"
-                  name="role"
-                  value="agent"
-                  checked={form.role === "agent"}
-                  onChange={(e) =>
-                    setForm({ ...form, role: e.target.value })
-                  }
-                  className="accent-blue-600"
-                />
-                Agent
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer text-gray-700">
-                <input
-                  type="radio"
-                  name="role"
-                  value="admin"
-                  checked={form.role === "admin"}
-                  onChange={(e) =>
-                    setForm({ ...form, role: e.target.value })
-                  }
-                  className="accent-blue-600"
-                />
-                Admin
-              </label>
-            </div>
-          </div>
-
-          {/* Contact */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
-              Contact Number
+              User Name
             </label>
             <input
               type="text"
-              placeholder="Enter contact number"
-              value={form.contact}
+              placeholder="Enter user name"
+              value={form.name}
               onChange={(e) =>
-                setForm({ ...form, contact: e.target.value })
+                setForm({ ...form, name: e.target.value })
               }
               className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Password
@@ -128,7 +100,6 @@ export default function Login() {
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}

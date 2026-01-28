@@ -1,54 +1,47 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { getGrievanceFilter } from "../../api/userService";
 
 const initialFilters = {
   status: "",
   block: "",
-  ward: "",
+  wardNo: "",
   dateFrom: "",
   dateTo: "",
 };
 
-export const useTableFilter = (data) => {
+export const useTableFilter = () => {
   const [filters, setFilters] = useState(initialFilters);
-  const [appliedFilters, setAppliedFilters] = useState(initialFilters);
+  const [filteredData, setFilteredData] = useState([]);
 
-  const applyFilters = () => {
-    console.log("Apply clicked", filters);
-    setAppliedFilters(filters);
+  const applyFilters = async () => {
+    try {
+      const params = new URLSearchParams();
+      console.log("inside apply filter function:", filters);
+      if (filters.status) params.append("status", filters.status);
+      if (filters.block) params.append("block", filters.block);
+      if (filters.wardNo) params.append("wardNo", filters.wardNo);
+      if (filters.dateFrom) params.append("fromDate", filters.dateFrom);
+      if (filters.dateTo) params.append("toDate", filters.dateTo);
+
+      const query = params.toString(); // status=PENDING&wardNo=30
+      console.log("Calling API with:", query);
+
+      const data = await getGrievanceFilter(query);
+      setFilteredData(data);
+    } catch (err) {
+      console.error("Filter API error:", err);
+    }
   };
 
-  const resetFilters = () => {
+  const resetFilters = async () => {
     setFilters(initialFilters);
-    setAppliedFilters(initialFilters);
+    try {
+      const data = await getGrievanceFilter("");
+      setFilteredData(data);
+    } catch (err) {
+      console.error("Reset API error:", err);
+    }
   };
-
-  const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      if (appliedFilters.status && item.status !== appliedFilters.status)
-        return false;
-
-      if (appliedFilters.block && item.block !== appliedFilters.block)
-        return false;
-
-      if (
-        appliedFilters.ward &&
-        !item.ward?.toString().includes(appliedFilters.ward)
-      )
-        return false;
-
-      if (appliedFilters.dateFrom) {
-        if (new Date(item.date) < new Date(appliedFilters.dateFrom))
-          return false;
-      }
-
-      if (appliedFilters.dateTo) {
-        if (new Date(item.date) > new Date(appliedFilters.dateTo))
-          return false;
-      }
-
-      return true;
-    });
-  }, [data, appliedFilters]);
 
   return {
     filters,

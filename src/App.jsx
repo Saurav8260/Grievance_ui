@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import AddAgent from "./pages/AddAgent";
+// import AddAgent from "./pages/AddAgent";
 import UserList from "./pages/UserList";
 import UserDetails from "./pages/UserDetails";
 import MainLayout from "./MainLayout";
 import GrievanceDetails from "./pages/GrievanceDetails";
 import EditGrievance from "./pages/EditGrievance";
 import GrievanceList from "./pages/GrievanceList";
+import AllGrievances from "./pages/AllGrievances";
 
 // simple auth guard
 const PrivateRoute = ({ children }) => {
@@ -23,9 +24,21 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/grievance/:id" element={<GrievanceDetails />} />
         <Route path="/grievance/edit/:id" element={<EditGrievance />} />
+        <Route path="/grievances" element={<GrievanceList />} />
+        {/* <Route path="/allgrievances" element={<AllGrievances />} /> */}
+
 
         {/* Protected Layout */}
         <Route element={<MainLayout />}>
+        
+        <Route
+          path="/allgrievances"
+          element={
+            <PrivateRoute>
+              <AllGrievances />
+            </PrivateRoute>
+          }
+        />
           <Route
             path="/dashboard"
             element={
@@ -35,14 +48,14 @@ export default function App() {
             }
           />
 
-          <Route
+          {/* <Route
             path="/AddAgent"
             element={
               <PrivateRoute>
                 <AddAgent />
               </PrivateRoute>
             }
-          />
+          /> */}
 
           <Route
             path="/userdetails"
@@ -89,6 +102,7 @@ export default function App() {
             }
           />
         </Route>
+
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />

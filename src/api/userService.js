@@ -2,15 +2,14 @@ const BASE_URL = "http://localhost:8080/api";
 
 // ================= LOGIN =================
 export const loginUser = async (payload) => {
-  
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload), // 
   });
-         console.log("Relode",response)
+
   const data = await response.json();
 
   if (!response.ok) {
@@ -19,6 +18,7 @@ export const loginUser = async (payload) => {
 
   return data;
 };
+
 
 // ================= CREATE USER =================
 export const createUser = async (payload) => {
@@ -51,8 +51,8 @@ export const getAllUsers = async () => {
     throw new Error(errorText || "Failed to fetch users");
   }
 
-  const data = await response.json();   // 👈 parse JSON directly
-  console.log("USERS DATA:", data);     // 👈 see real fields
+  const data = await response.json();   
+  console.log("USERS DATA:", data);     
   return data;
 };
 // ================= GET USER BY ID =================
@@ -203,22 +203,55 @@ export const patchUserStatus = async (userId, activate) => {
 
 // ================= GET ALL GRIEVANCES =================
 
-export const fetchGrievances = async () => {
+export const fetchGrievances = async (page = 0, size = 20) => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${BASE_URL}/grievances/all`, {
+  const response = await fetch(
+    `${BASE_URL}/grievances/all?page=${page}&size=${size}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) throw new Error("Failed to fetch grievances");
+  return response.json();
+};
+
+// ================= GET GRIEVANCE LIST FOR ADMIN =================
+export const getGrievanceFilter = async (query) => {
+  const token = localStorage.getItem("token"); // or sessionStorage
+
+  const response = await fetch(`${BASE_URL}/grievances?${query}`, {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`,   // THIS WAS MISSING
     },
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    console.error("API Error:", response.status, text);
-    throw new Error("Failed to fetch grievances");
+    const error = await response.text();
+    throw new Error(error || "Failed to fetch grievances");
   }
 
   return response.json();
 };
 
+
+// ================= CREATE GRIEVANCE =================
+export const createGrievance = async (data) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch("http://localhost:8080/api/grievances", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+};

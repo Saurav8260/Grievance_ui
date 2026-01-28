@@ -1,4 +1,5 @@
 import React from "react";
+import { TbDashboard } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
 function StatusBadge({ status }) {
@@ -25,7 +26,7 @@ function StatusBadge({ status }) {
 export default function GrievanceTable({ data }) {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+      <div className="overflow-x-auto max-h-[500px] max-w-[1500px] overflow-y-auto">
         <table className="w-full border-collapse text-sm">
           {/* ================= HEADER ================= */}
           <thead className="bg-gray-50 sticky top-0 z-10">
@@ -33,9 +34,14 @@ export default function GrievanceTable({ data }) {
               {[
                 "SL No.",
                 "Name",
+                "Father/Spouse Name",
+                "Block",
+                  "GP",
+                  "Village/Sahi",
+                "wardNo",
                 "Location",
                 "Topic",
-                "Block",
+               " Remarks",
                 "Date",
                 "Status",
                 "Agent",
@@ -61,7 +67,6 @@ export default function GrievanceTable({ data }) {
                   key={row.id || i}
                   className="hover:bg-blue-50 transition-colors"
                 >
-                  
                   <td className="py-3 px-4 text-gray-700">{i + 1}</td>
 
                   <td className="py-3 px-4">
@@ -71,15 +76,21 @@ export default function GrievanceTable({ data }) {
                     <div className="text-xs text-gray-500">{row.subName}</div>
                   </td>
 
+                  <td className="py-3 px-4 text-gray-700">
+                    {row.fatherSpouseName}
+                  </td>
+                   <td className="py-3 px-4 text-gray-700">{row.block}</td>
+                    <td className="py-3 px-4 text-gray-700">{row.gp}</td>
+                     <td className="py-3 px-4 text-gray-700">{row.villageSahi}</td>
+                  <td className="py-3 px-4 text-gray-700">{row.wardNo}</td>
                   <td className="py-3 px-4 text-gray-700">{row.location}</td>
                   <td className="py-3 px-4 text-gray-700">{row.topic}</td>
-                  <td className="py-3 px-4 text-gray-700">{row.block}</td>
+                  <td className="py-3 px-4 text-gray-700">{row.agentRemarks}</td>
                   <td className="py-3 px-4 text-gray-700">{row.date}</td>
 
                   <td className="py-3 px-4">
                     <StatusBadge status={row.status} />
                   </td>
-
                   <td className="py-3 px-4 text-gray-700">{row.agent}</td>
 
                   {/* ================= ACTIONS ================= */}
