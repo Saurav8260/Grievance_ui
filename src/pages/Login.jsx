@@ -6,7 +6,7 @@ export default function Login() {
   const [form, setForm] = useState({
     name: "",
     password: "",
-    role: "admin",
+    role: "ADMIN",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
