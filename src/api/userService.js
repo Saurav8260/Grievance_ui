@@ -7,7 +7,7 @@ export const loginUser = async (payload) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload), // 
+    body: JSON.stringify(payload),
   });
 
   const data = await response.json();
@@ -20,11 +20,17 @@ export const loginUser = async (payload) => {
 };
 
 
+
 // ================= CREATE USER =================
 export const createUser = async (payload) => {
-  const response = await fetch("http://localhost:8080/api/auth/signup", {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${BASE_URL}/users/agent-signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify(payload),
   });
 
@@ -244,7 +250,7 @@ export const getGrievanceFilter = async (query) => {
 export const createGrievance = async (data) => {
   const token = localStorage.getItem("token");
 
-  const res = await fetch("http://localhost:8080/api/grievances", {
+  const res = await fetch(`${BASE_URL}/grievances`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -255,3 +261,4 @@ export const createGrievance = async (data) => {
 
   return res.json();
 };
+
